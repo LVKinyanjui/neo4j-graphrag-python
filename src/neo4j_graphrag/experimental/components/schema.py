@@ -576,7 +576,9 @@ class SchemaFromTextExtractor(BaseSchemaBuilder):
             raise LLMGenerationError("Failed to generate schema from text") from e
 
         try:
-            extracted_schema: Dict[str, Any] = json.loads(content)
+            # Rwmoving probable code formatting artifacts
+            json_content = content.replace("```json", "").replace("```", "")
+            extracted_schema: Dict[str, Any] = json.loads(json_content)
 
             # handle dictionary
             if isinstance(extracted_schema, dict):
@@ -600,6 +602,7 @@ class SchemaFromTextExtractor(BaseSchemaBuilder):
                     f"Unexpected schema format returned from LLM: {type(extracted_schema)}. Expected a dictionary or list of dictionaries."
                 )
         except json.JSONDecodeError as exc:
+            print(f"\n\nLLM Response: {content}")
             raise SchemaExtractionError("LLM response is not valid JSON.") from exc
 
         extracted_node_types: List[Dict[str, Any]] = (
